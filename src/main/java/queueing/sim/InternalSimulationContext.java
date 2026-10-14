@@ -54,7 +54,8 @@ final class InternalSimulationContext implements SimulationContext {
   }
 
   StrategyBag strategyBag() {
-    throw new UnsupportedOperationException("Unimplemented method 'strategyBag'");
+    return strategyBag;
+    // throw new UnsupportedOperationException("Unimplemented method 'strategyBag'");
   }
 
   List<Probe> probes() {

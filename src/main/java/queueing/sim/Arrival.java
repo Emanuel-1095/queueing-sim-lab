@@ -1,5 +1,6 @@
 package queueing.sim;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -73,14 +74,37 @@ final class Arrival implements Event {
   @Override
   public void execute(SimulationContext context) {
 
-    // InternalSimulationContext internalContext = (InternalSimulationContext) context;
+    InternalSimulationContext internalContext = (InternalSimulationContext) context;
+    List<ServerView> availableServers = internalContext.model().availableServers();
 
-    // if (!availableServers.isEmpty()) {
+    if (!availableServers.isEmpty()) {
+      int selectedServer = internalContext.strategyBag().serverSelection().select(availableServers);
+      Server server = internalContext.model().server(selectedServer);
+      server.seize(this.entity);
+      server.serviceDuration(null);
+      
+      internalContext.schedule(
+          new Departure(
+              this.clock + interarrivalTimeGenerator.generate(null), this.entity, server
+          )
+      );
+    }
+    else {
+      List<QueueView> queues = internalContext.model().queues();
+      int selectedQueue = internalContext.strategyBag().arrivalQueueSelection().select(queues);
+      Queue queue = internalContext.model().queue(selectedQueue);
+      queue.add(this.entity);
+    }
+    
+    internalContext.schedule(
+        new Arrival(
+            this.clock + interarrivalTimeGenerator.generate(null),
+            entityGenerator.generate(),
+            interarrivalTimeGenerator,
+            entityGenerator
+        )
+    );
 
-    // }
-    // else {
-
-    // }
 
     throw new UnsupportedOperationException("Unimplemented method 'execute'");
   }
