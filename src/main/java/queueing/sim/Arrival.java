@@ -81,11 +81,11 @@ final class Arrival implements Event {
       int selectedServer = internalContext.strategyBag().serverSelection().select(availableServers);
       Server server = internalContext.model().server(selectedServer);
       server.seize(this.entity);
-      server.serviceDuration(null);
+      double serviceDuration = server.serviceDuration(context.randomGenerator());
       
       internalContext.schedule(
           new Departure(
-              this.clock + interarrivalTimeGenerator.generate(null), this.entity, server
+              this.clock + serviceDuration, this.entity, server
           )
       );
     }
@@ -98,15 +98,13 @@ final class Arrival implements Event {
     
     internalContext.schedule(
         new Arrival(
-            this.clock + interarrivalTimeGenerator.generate(null),
+            this.clock + interarrivalTimeGenerator.generate(context.randomGenerator()),
             entityGenerator.generate(),
             interarrivalTimeGenerator,
             entityGenerator
         )
     );
 
-
-    throw new UnsupportedOperationException("Unimplemented method 'execute'");
   }
 
   @Override
