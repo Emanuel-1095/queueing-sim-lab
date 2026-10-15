@@ -75,6 +75,9 @@ public interface Probe {
    */
   default void queueSizeChanged(double clock, QueueView queue) {}
 
+
+// Corresponden a la simulación. Indican el inicio y el fin de la simulación
+
   /**
    * Notifies that the simulation has started.
    *

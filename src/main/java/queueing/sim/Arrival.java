@@ -49,7 +49,7 @@ final class Arrival implements Event {
 
   @Override
   public double clock() {
-    throw new UnsupportedOperationException("Unimplemented method 'clock'");
+    return this.clock;
   }
 
   @Override
@@ -74,18 +74,23 @@ final class Arrival implements Event {
   @Override
   public void execute(SimulationContext context) {
 
+    
     InternalSimulationContext internalContext = (InternalSimulationContext) context;
     List<ServerView> availableServers = internalContext.model().availableServers();
 
+    // Colocar el Probe para calcular o obtener la cantidad de arribos
+    internalContext.probes().forEach(probe -> probe.entityArrived(this.clock, this.entity));
+
     if (!availableServers.isEmpty()) {
-      int selectedServer = internalContext.strategyBag().serverSelection().select(availableServers);
-      Server server = internalContext.model().server(selectedServer);
-      server.seize(this.entity);
-      double serviceDuration = server.serviceDuration(context.randomGenerator());
+      // Devuelve un entero que representa el id del servidor
+      int selectedServerId = internalContext.strategyBag().serverSelection().select(availableServers);
+      Server selectedServer = internalContext.model().server(selectedServerId);
+      selectedServer.seize(this.entity);
+      double serviceDuration = selectedServer.serviceDuration(internalContext.randomGenerator());
       
       internalContext.schedule(
           new Departure(
-              this.clock + serviceDuration, this.entity, server
+              this.clock + serviceDuration, this.entity, selectedServer
           )
       );
     }
@@ -98,10 +103,10 @@ final class Arrival implements Event {
     
     internalContext.schedule(
         new Arrival(
-            this.clock + interarrivalTimeGenerator.generate(context.randomGenerator()),
-            entityGenerator.generate(),
-            interarrivalTimeGenerator,
-            entityGenerator
+            this.clock + interarrivalTimeGenerator.generate(internalContext.randomGenerator()),
+            this.entityGenerator.generate(),
+            this.interarrivalTimeGenerator,
+            this.entityGenerator
         )
     );
 

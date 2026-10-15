@@ -74,6 +74,7 @@ final class InternalSimulationContext implements SimulationContext {
 
   @Override
   public void schedule(Event event) {
+    this.futureEventList.insert(event);
     throw new UnsupportedOperationException("Unimplemented method 'schedule'");
   }
 }

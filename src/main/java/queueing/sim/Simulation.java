@@ -22,7 +22,10 @@ public final class Simulation {
   private final double simLength;
 
   /** The queueing model being simulated. */
-  private final QueueingModel model;
+  // Forma de definir el modelo de colas que se va a simular, incluyendo servidores, colas y entidades.
+  // Es una capa de abstracción que encapsula la lógica del sistema de colas y permite que la simulación interactúe con él sin preocuparse por los detalles internos.
+  // 
+  private final QueueingModel model;      
 
   /** The random generator used by the simulation. */
   private final RandomGenerator randomGenerator;
@@ -31,7 +34,7 @@ public final class Simulation {
   private final StrategyBag strategyBag;
 
   /** The generator of interarrival times. */
-  private final TimeGenerator interarrivalTimeGenerator;
+  private final TimeGenerator interarrivalTimeGenerator;  // Distinto al tiempo de servicio, este es el tiempo entre llegadas de entidades al sistema.
 
   /** The Future Event List containing scheduled events. */
   private final FutureEventList futureEventList;
