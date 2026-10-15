@@ -73,8 +73,18 @@ public final class Simulation {
     if (!Double.isFinite(simLength) || simLength < 0.0) {
       throw new IllegalArgumentException("Simulation length must be finite and non-negative");
     }
+    
+    this.initClock = initClock;
+    this.simLength = simLength;
+    this.model = Objects.requireNonNull(model);
+    this.randomGenerator = Objects.requireNonNull(randomGenerator);
+    this.interarrivalTimeGenerator = Objects.requireNonNull(interarrivalTimeGenerator);
+    this.strategyBag = Objects.requireNonNull(strategyBag);
+    this.probes = Objects.requireNonNull(probes);
+    this.stepByStep = stepByStep;
 
-    throw new UnsupportedOperationException("Unimplemented constructor 'Simulation'");
+    this.futureEventList = new FutureEventList();
+    
   }
 
   /**
@@ -92,56 +102,69 @@ public final class Simulation {
 
     double endClock = this.initClock + this.simLength;
 
-    InternalSimulationContext context = null;
+    InternalSimulationContext context = new InternalSimulationContext(this.futureEventList, this.randomGenerator, this.model, this.strategyBag, this.probes);
 
-    EntityGenerator entityGenerator;
+    long[] nextId = {1};    // Es equivalente a un long nextId = 1; 
+    EntityGenerator entityGenerator = () -> new Entity(nextId[0]++);
+
+    if(this.futureEventList.isEmpty()) {
+      this.futureEventList.insert(new Arrival(initClock, entityGenerator.generate(), interarrivalTimeGenerator, entityGenerator));
+    }
 
     Scanner scanner = this.stepByStep ? new Scanner(System.in) : null;
 
     // Code here: the probes must be notified that the simulation has started and that the servers
     // are currently idle.
+    this.probes.forEach(probe -> probe.simulationStarted(initClock));
+    this.model.servers().forEach(server -> this.probes.forEach(probe -> probe.serverBecameIdle(initClock, server)));
+
 
     while (!this.futureEventList.isEmpty() && this.futureEventList.peek().clock() <= endClock) {
-
-      if (this.stepByStep) {
-        System.out.println("Step-by-step mode: Press ENTER to inspect the imminent event...");
-        scanner.nextLine();
-      }
+      
+      // if (this.stepByStep) {
+      //   System.out.println("Step-by-step mode: Press ENTER to inspect the imminent event...");
+      //   scanner.nextLine();
+      // }
 
       Event event = this.futureEventList.peek();
 
-      if (this.stepByStep) {
-        System.out.println("========================================");
-        System.out.println("CLOCK: " + event.clock());
-        System.out.println();
-        System.out.println("EVENT:");
-        System.out.println("  " + event);
-        System.out.println();
-        System.out.println("FEL:");
-        System.out.println("  " + this.futureEventList);
-        System.out.println();
-        System.out.println("MODEL:");
-        System.out.println(this.model);
-        System.out.println("========================================\n");
-
-        System.out.println("Press ENTER to process the imminent event...");
-        scanner.nextLine();
-      }
+      // if (this.stepByStep) {
+      //   System.out.println("========================================");
+      //   System.out.println("CLOCK: " + event.clock());
+      //   System.out.println();
+      //   System.out.println("EVENT:");
+      //   System.out.println("  " + event);
+      //   System.out.println();
+      //   System.out.println("FEL:");
+      //   System.out.println("  " + this.futureEventList);
+      //   System.out.println();
+      //   System.out.println("MODEL:");
+      //   System.out.println(this.model);
+      //   System.out.println("========================================\n");
+        
+      //   System.out.println("Press ENTER to process the imminent event...");
+      //   scanner.nextLine();
+      // }
 
       // Code here: you must advance time in the simulation.
+      event = this.futureEventList.imminent();
+      event.execute(context);
 
-      if (this.stepByStep) {
-        System.out.println("========================================");
-        System.out.println();
-        System.out.println("FEL:");
-        System.out.println("  " + this.futureEventList);
-        System.out.println();
-        System.out.println("MODEL:");
-        System.out.println(this.model);
-        System.out.println("========================================\n");
-      }
+      // if (this.stepByStep) {
+      //   System.out.println("========================================");
+      //   System.out.println();
+      //   System.out.println("FEL:");
+      //   System.out.println("  " + this.futureEventList);
+      //   System.out.println();
+      //   System.out.println("MODEL:");
+      //   System.out.println(this.model);
+      //   System.out.println("========================================\n");
+      // }
+
     }
 
     // Code here: notify the probes that the simulation has ended
+    this.probes.forEach(probe -> probe.simulationFinished(endClock));
+    
   }
 }

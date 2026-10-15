@@ -59,22 +59,21 @@ final class InternalSimulationContext implements SimulationContext {
   }
 
   List<Probe> probes() {
-    throw new UnsupportedOperationException("Unimplemented method 'probes'");
+    return this.probes;
   }
 
   @Override
   public RandomGenerator randomGenerator() {
-    throw new UnsupportedOperationException("Unimplemented method 'randomGenerator'");
+    return this.randomGenerator;
   }
 
   @Override
   public QueueingModel model() {
-    throw new UnsupportedOperationException("Unimplemented method 'model'");
+    return this.model;
   }
 
   @Override
   public void schedule(Event event) {
     this.futureEventList.insert(event);
-    throw new UnsupportedOperationException("Unimplemented method 'schedule'");
   }
 }

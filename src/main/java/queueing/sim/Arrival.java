@@ -54,7 +54,7 @@ final class Arrival implements Event {
 
   @Override
   public int priority() {
-    throw new UnsupportedOperationException("Unimplemented method 'priority'");
+    return 0;   // Mientras mas bajo el numero, mayor prioridad
   }
 
   /**

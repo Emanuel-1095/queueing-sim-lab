@@ -63,7 +63,8 @@ final class FutureEventList {
    * @throws IllegalStateException if the Future Event List is empty
    */
   Event imminent() {
-    throw new UnsupportedOperationException("Unimplemented method 'imminent'");
+    this.events.sort(this.comparator);
+    return this.events.removeFirst();
   }
 
   /**

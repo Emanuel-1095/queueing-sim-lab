@@ -1,5 +1,6 @@
 package queueing.sim;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -36,12 +37,12 @@ final class Departure implements Event {
 
   @Override
   public double clock() {
-    throw new UnsupportedOperationException("Unimplemented method 'clock'");
+    return this.clock;
   }
 
   @Override
   public int priority() {
-    throw new UnsupportedOperationException("Unimplemented method 'priority'");
+    return 1;   // Mientras mas alto el numero, menor prioridad
   }
 
   /**
@@ -57,16 +58,32 @@ final class Departure implements Event {
   @Override
   public void execute(SimulationContext context) {
 
-    throw new UnsupportedOperationException("Unimplemented method 'execute'");
+    InternalSimulationContext internalContext = (InternalSimulationContext) context;
+    EntityView entityRealeased = this.server.release();
+    List<QueueView> queuesList = internalContext.model().queues().stream().filter(queue -> queue.size() > 0).toList();
+    
+    //probes
+    internalContext.probes().forEach(probe -> probe.entityDeparted(this.clock, entityRealeased));
+    
+    if (!queuesList.isEmpty()) {
+      int selectedQueueId = internalContext.strategyBag().departureQueueSelection().select(queuesList);
+      Queue selectedQueue = internalContext.model().queue(selectedQueueId);
 
-    // InternalSimulationContext internalContext = (InternalSimulationContext) context;
+      Entity nextEntity = selectedQueue.remove();
+      this.server.seize(nextEntity);
+      double serviceDuration = this.server.serviceDuration(internalContext.randomGenerator());
+      internalContext.schedule(
+        new Departure(
+          this.clock + serviceDuration, nextEntity, this.server
+        )
+      );
+      //probes
 
-    // if (!queuesWithWaitingEntities.isEmpty()) {
+    }
+    else {
+      //probes
 
-    // }
-    // else {
-
-    // }
+    }
   }
 
   @Override
