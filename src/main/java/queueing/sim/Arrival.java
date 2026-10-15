@@ -85,7 +85,12 @@ final class Arrival implements Event {
       // Devuelve un entero que representa el id del servidor
       int selectedServerId = internalContext.strategyBag().serverSelection().select(availableServers);
       Server selectedServer = internalContext.model().server(selectedServerId);
+      
       selectedServer.seize(this.entity);
+
+      // Probe notifica que el servidor seleccionado se ha ocupado
+      internalContext.probes().forEach(probe -> probe.serverBecameBusy(this.clock, selectedServer));
+
       double serviceDuration = selectedServer.serviceDuration(internalContext.randomGenerator());
       
       internalContext.schedule(
@@ -99,6 +104,11 @@ final class Arrival implements Event {
       int selectedQueue = internalContext.strategyBag().arrivalQueueSelection().select(queues);
       Queue queue = internalContext.model().queue(selectedQueue);
       queue.add(this.entity);
+
+      // Probe notifica que la entidad ha sido encolada
+      // Checkearlo
+      internalContext.probes().forEach(probe -> probe.entityEnteredQueue(this.clock, this.entity, queue));
+      internalContext.probes().forEach(probe -> probe.queueSizeChanged(this.clock, queue));
     }
     
     internalContext.schedule(
@@ -109,7 +119,6 @@ final class Arrival implements Event {
             this.entityGenerator
         )
     );
-
   }
 
   @Override

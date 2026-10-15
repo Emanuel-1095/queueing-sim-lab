@@ -77,11 +77,12 @@ final class Departure implements Event {
           this.clock + serviceDuration, nextEntity, this.server
         )
       );
-      //probes
-
+      //checkearlo
+      internalContext.probes().forEach(probe -> probe.serverBecameBusy(this.clock, this.server));
     }
     else {
-      //probes
+      //checkearlo
+      internalContext.probes().forEach(probe -> probe.serverBecameIdle(this.clock, this.server));
 
     }
   }
