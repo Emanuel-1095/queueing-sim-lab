@@ -54,7 +54,7 @@ final class Arrival implements Event {
 
   @Override
   public int priority() {
-    return 0;   // Mientras mas bajo el numero, mayor prioridad
+    return 1;   // Mientras mas alto el numero, menor prioridad
   }
 
   /**
@@ -89,6 +89,7 @@ final class Arrival implements Event {
       selectedServer.seize(this.entity);
 
       // Probe notifica que el servidor seleccionado se ha ocupado
+      internalContext.probes().forEach(probe -> probe.serviceStarted(this.clock, this.entity, selectedServer));
       internalContext.probes().forEach(probe -> probe.serverBecameBusy(this.clock, selectedServer));
 
       double serviceDuration = selectedServer.serviceDuration(internalContext.randomGenerator());

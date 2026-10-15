@@ -42,7 +42,7 @@ final class Departure implements Event {
 
   @Override
   public int priority() {
-    return 1;   // Mientras mas alto el numero, menor prioridad
+    return 0;   // Mientras mas bajo el numero, mayor prioridad
   }
 
   /**
@@ -78,7 +78,9 @@ final class Departure implements Event {
         )
       );
       //checkearlo
-      internalContext.probes().forEach(probe -> probe.serverBecameBusy(this.clock, this.server));
+      internalContext.probes().forEach(probe -> probe.queueSizeChanged(this.clock, selectedQueue));
+      internalContext.probes().forEach(probe -> probe.serviceStarted(this.clock, nextEntity, this.server));
+
     }
     else {
       //checkearlo
