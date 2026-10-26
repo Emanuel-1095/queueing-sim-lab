@@ -1,6 +1,10 @@
 package queueing.sim.probes;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import queueing.sim.QueueView;
+import queueing.sim.ServerView;
 
 /**
  * A probe that records the maximum size reached by each queue.
@@ -10,6 +14,7 @@ import queueing.sim.QueueView;
  */
 public final class MaxQueueSize implements Probe {
 
+  private final Map<Integer, Integer> maxSizeQueues = new HashMap<>();
   /**
    * Records the current size of a queue.
    *
@@ -20,7 +25,11 @@ public final class MaxQueueSize implements Probe {
    */
   @Override
   public void queueSizeChanged(double clock, QueueView queue) {
-    throw new UnsupportedOperationException("Unimplemented method 'queueSizeChanged'");
+    Integer maxSize = maxSizeQueues.get(queue.id());
+    Integer currentSize = queue.size();
+    if (maxSize == null || currentSize > maxSize) {
+      maxSizeQueues.put(queue.id(), currentSize);
+    }
   }
 
   /**
@@ -31,6 +40,10 @@ public final class MaxQueueSize implements Probe {
    * @throws IllegalArgumentException if no size change has been recorded for the specified queue
    */
   public int maxQueueSize(int queueId) {
-    throw new UnsupportedOperationException("Unimplemented method 'maxQueueSize'");
+    if (!maxSizeQueues.containsKey(queueId)) {
+      throw new IllegalArgumentException(
+          "No size change recorded for queue with ID: " + queueId);
+    }
+    return maxSizeQueues.get(queueId);
   }
 }

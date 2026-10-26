@@ -24,7 +24,7 @@ final class Entity implements EntityView {
 
   @Override
   public long id() {
-    throw new UnsupportedOperationException("Unimplemented method 'id'");
+    return this.id;
   }
 
   /**
@@ -33,7 +33,7 @@ final class Entity implements EntityView {
    * @return the entity arrival time
    */
   double arrivalTime() {
-    throw new UnsupportedOperationException("Unimplemented method 'arrivalTime'");
+    return this.arrivalTime;
   }
 
   /**
@@ -42,7 +42,7 @@ final class Entity implements EntityView {
    * @param arrivalTime the entity arrival time
    */
   void arrivalTime(double arrivalTime) {
-    throw new UnsupportedOperationException("Unimplemented method 'arrivalTime'");
+    this.arrivalTime = arrivalTime;
   }
 
   /**

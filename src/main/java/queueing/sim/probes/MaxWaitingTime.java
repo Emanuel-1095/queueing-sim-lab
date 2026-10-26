@@ -1,5 +1,8 @@
 package queueing.sim.probes;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import queueing.sim.EntityView;
 import queueing.sim.QueueView;
 import queueing.sim.ServerView;
@@ -15,6 +18,9 @@ import queueing.sim.ServerView;
  */
 public final class MaxWaitingTime implements Probe {
 
+  private final Map<Long, Double> entryTimes = new HashMap<>();
+  private double maxWaitingTime = 0.0;
+
   /**
    * Records the time at which an entity enters a queue.
    *
@@ -24,7 +30,7 @@ public final class MaxWaitingTime implements Probe {
    */
   @Override
   public void entityEnteredQueue(double clock, EntityView entity, QueueView queue) {
-    throw new UnsupportedOperationException("Unimplemented method 'entityEnteredQueue'");
+    entryTimes.put(entity.id(), clock);
   }
 
   /**
@@ -40,7 +46,13 @@ public final class MaxWaitingTime implements Probe {
    */
   @Override
   public void serviceStarted(double clock, EntityView entity, ServerView server) {
-    throw new UnsupportedOperationException("Unimplemented method 'serviceStarted'");
+    Double entryTime = entryTimes.remove(entity.id());
+    if (entryTime != null){
+      double waitingTime = clock - entryTime;
+      if (waitingTime > maxWaitingTime) {
+        maxWaitingTime = waitingTime;
+      }
+    }
   }
 
   /**
@@ -49,6 +61,6 @@ public final class MaxWaitingTime implements Probe {
    * @return the maximum waiting time
    */
   public double maxWaitingTime() {
-    throw new UnsupportedOperationException("Unimplemented method 'maxWaitingTime'");
+    return maxWaitingTime;
   }
 }

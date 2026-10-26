@@ -30,7 +30,12 @@ final class Queue implements QueueView {
    * @throws IllegalArgumentException if {@code servers} is empty
    */
   Queue(int id, List<Server> servers) {
-    throw new UnsupportedOperationException("Unimplemented constructor 'Queue'");
+    this.servers = List.copyOf(servers); // Copia la lista y valida que no sea null
+    if (this.servers.isEmpty()) {
+      throw new IllegalArgumentException("A queue must have at least one server");
+    }
+    
+    this.id = id;
   }
 
   /**
@@ -39,7 +44,7 @@ final class Queue implements QueueView {
    * @return {@code true} if the queue is empty, otherwise {@code false}
    */
   boolean isEmpty() {
-    throw new UnsupportedOperationException("Unimplemented method 'isEmpty'");
+    return this.entities.isEmpty();
   }
 
   /**
@@ -49,7 +54,10 @@ final class Queue implements QueueView {
    * @throws NullPointerException if {@code entity} is {@code null}
    */
   void add(Entity entity) {
-    throw new UnsupportedOperationException("Unimplemented method 'add'");
+    if (entity == null) {
+      throw new NullPointerException("entity cannot be null");
+    }
+    this.entities.addLast(entity);
   }
 
   /**
@@ -58,7 +66,7 @@ final class Queue implements QueueView {
    * @return the first waiting entity, or {@code null} if the queue is empty
    */
   Entity peek() {
-    throw new UnsupportedOperationException("Unimplemented method 'peek'");
+    return this.entities.peekFirst();
   }
 
   /**
@@ -67,7 +75,7 @@ final class Queue implements QueueView {
    * @return the first waiting entity, or {@code null} if the queue is empty
    */
   Entity remove() {
-    throw new UnsupportedOperationException("Unimplemented method 'remove'");
+    return this.entities.pollFirst();
   }
 
   /**
@@ -76,7 +84,7 @@ final class Queue implements QueueView {
    * @return an unmodifiable list of associated servers
    */
   List<Server> servers() {
-    throw new UnsupportedOperationException("Unimplemented method 'servers'");
+    return this.servers;
   }
 
   /**
@@ -85,17 +93,17 @@ final class Queue implements QueueView {
    * @return an unmodifiable list of available servers
    */
   List<Server> availableServers() {
-    throw new UnsupportedOperationException("Unimplemented method 'availableServers'");
+    return this.servers.stream().filter(server -> !server.isBusy()).toList();                   // Chequear segun el test
   }
 
   @Override
   public int id() {
-    throw new UnsupportedOperationException("Unimplemented method 'id'");
+    return this.id;
   }
 
   @Override
   public int size() {
-    throw new UnsupportedOperationException("Unimplemented method 'size'");
+    return this.entities.size();
   }
 
   @Override

@@ -1,5 +1,8 @@
 package queueing.sim.probes;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import queueing.sim.ServerView;
 
 /**
@@ -12,6 +15,9 @@ import queueing.sim.ServerView;
  */
 public final class IdleTime implements Probe {
 
+  private final Map<Integer, Double> totalIdleTime = new HashMap<>();
+  private final Map<Integer, Double> idleStartTimes = new HashMap<>();
+
   /**
    * Records the moment at which a server becomes idle.
    *
@@ -20,7 +26,7 @@ public final class IdleTime implements Probe {
    */
   @Override
   public void serverBecameIdle(double clock, ServerView server) {
-    throw new UnsupportedOperationException("Unimplemented method 'serverBecameIdle'");
+    idleStartTimes.put(server.id(), clock);
   }
 
   /**
@@ -35,7 +41,12 @@ public final class IdleTime implements Probe {
    */
   @Override
   public void serverBecameBusy(double clock, ServerView server) {
-    throw new UnsupportedOperationException("Unimplemented method 'serverBecameBusy'");
+    if (!idleStartTimes.containsKey(server.id())) {
+      throw new IllegalStateException("Server has not been reported as idle: " + server);
+    }
+    double idleStartTime = idleStartTimes.remove(server.id());
+    double idleTime = clock - idleStartTime;
+    totalIdleTime.put(server.id(), totalIdleTime.getOrDefault(server.id(), 0.0) + idleTime);
   }
 
   /**
@@ -45,7 +56,12 @@ public final class IdleTime implements Probe {
    */
   @Override
   public void simulationFinished(double clock) {
-    throw new UnsupportedOperationException("Unimplemented method 'simulationFinished'");
+    for (Map.Entry<Integer, Double> entry : idleStartTimes.entrySet()) {
+      double idleStartTime = entry.getValue();
+      double idleTime = clock - idleStartTime;
+      totalIdleTime.put(entry.getKey(), totalIdleTime.getOrDefault(entry.getKey(), 0.0) + idleTime);
+    }
+    idleStartTimes.clear();
   }
 
   /**
@@ -56,6 +72,10 @@ public final class IdleTime implements Probe {
    * @throws IllegalArgumentException if no idle time was recorded for the server
    */
   public double totalIdleTime(int serverId) {
-    throw new UnsupportedOperationException("Unimplemented method 'totalIdleTime'");
+    Double total = this.totalIdleTime.get(serverId);
+    if (total == null) {
+      throw new IllegalArgumentException("No idle time recorded for server: " + serverId);
+    }
+    return total;
   }
 }

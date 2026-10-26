@@ -1,5 +1,8 @@
 package queueing.sim.probes;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import queueing.sim.ServerView;
 
 /**
@@ -15,6 +18,8 @@ import queueing.sim.ServerView;
  */
 public final class MaxIdleTime implements Probe {
 
+  private final Map<Integer, Double> idleStartTimes = new HashMap<>();
+  private final Map<Integer, Double> maxIdleTimes = new HashMap<>();
   /**
    * Records the moment at which a server becomes idle.
    *
@@ -23,7 +28,7 @@ public final class MaxIdleTime implements Probe {
    */
   @Override
   public void serverBecameIdle(double clock, ServerView server) {
-    throw new UnsupportedOperationException("Unimplemented method 'serverBecameIdle'");
+    idleStartTimes.put(server.id(), clock);
   }
 
   /**
@@ -38,7 +43,15 @@ public final class MaxIdleTime implements Probe {
    */
   @Override
   public void serverBecameBusy(double clock, ServerView server) {
-    throw new UnsupportedOperationException("Unimplemented method 'serverBecameBusy'");
+    Double idleStartTime = idleStartTimes.remove(server.id());
+    if (idleStartTime == null) {
+      throw new IllegalStateException("Server has not become idle: " + server.id());
+    }
+    double idleDuration = clock - idleStartTime;
+    Double currentMax = maxIdleTimes.get(server.id());
+    if (currentMax == null || idleDuration > currentMax) {
+      maxIdleTimes.put(server.id(), idleDuration);
+    }
   }
 
   /**
@@ -48,7 +61,14 @@ public final class MaxIdleTime implements Probe {
    */
   @Override
   public void simulationFinished(double clock) {
-    throw new UnsupportedOperationException("Unimplemented method 'simulationFinished'");
+    for (Map.Entry<Integer, Double> entry : idleStartTimes.entrySet()) {
+      double idleDuration = clock - entry.getValue();
+      Double currentMax = maxIdleTimes.get(entry.getKey());
+      if (currentMax == null || idleDuration > currentMax) {
+        maxIdleTimes.put(entry.getKey(), idleDuration);
+      }
+    }
+    idleStartTimes.clear();
   }
 
   /**
@@ -59,6 +79,9 @@ public final class MaxIdleTime implements Probe {
    * @throws IllegalArgumentException if no idle period has been recorded for the specified server
    */
   public double maxIdleTime(int serverId) {
-    throw new UnsupportedOperationException("Unimplemented method 'maxIdleTime'");
+    if (!maxIdleTimes.containsKey(serverId)) {
+      throw new IllegalArgumentException ("No idle period recorded for server: " + serverId);
+    }
+    return this.maxIdleTimes.get(serverId);
   }
 }

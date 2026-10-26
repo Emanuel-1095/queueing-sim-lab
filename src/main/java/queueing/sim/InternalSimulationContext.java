@@ -54,7 +54,7 @@ final class InternalSimulationContext implements SimulationContext {
   }
 
   StrategyBag strategyBag() {
-    return strategyBag;
+    return this.strategyBag;
     // throw new UnsupportedOperationException("Unimplemented method 'strategyBag'");
   }
 

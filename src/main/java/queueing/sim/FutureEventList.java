@@ -3,6 +3,7 @@ package queueing.sim;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A list of events sorted by their simulation clock and priority.
@@ -23,14 +24,19 @@ final class FutureEventList {
    * <p>Events with lower simulation times are ordered first. For events with the same simulation
    * time, events with lower priority values are ordered first.
    */
-  private final Comparator<Event> comparator = null;
+  private final Comparator<Event> comparator = Comparator.comparingDouble(Event::clock)
+      .thenComparingInt(Event::priority);
 
   /**
    * Constructs a Future Event List with the given events.
    *
    * @param events the events to initialize the Future Event List with
    */
-  FutureEventList(Event... events) {}
+  FutureEventList(Event... events) {
+    for (Event event : events) {
+      this.events.add(Objects.requireNonNull(event, "event cannot be null"));
+    }
+  }
 
   /**
    * Inserts an event into the Future Event List.
@@ -39,7 +45,7 @@ final class FutureEventList {
    * @throws NullPointerException if {@code event} is {@code null}
    */
   void insert(Event event) {
-    throw new UnsupportedOperationException("Unimplemented method 'insert'");
+    this.events.add(Objects.requireNonNull(event, "event cannot be null"));
   }
 
   /**
@@ -49,7 +55,9 @@ final class FutureEventList {
    * @throws IllegalStateException if the Future Event List is empty
    */
   Event peek() {
-    throw new UnsupportedOperationException("Unimplemented method 'peek'");
+    this.ensureNotEmpty();
+    this.events.sort(this.comparator);
+    return this.events.get(0);
   }
 
   /**
@@ -63,6 +71,7 @@ final class FutureEventList {
    * @throws IllegalStateException if the Future Event List is empty
    */
   Event imminent() {
+    this.ensureNotEmpty();
     this.events.sort(this.comparator);
     return this.events.removeFirst();
   }
@@ -73,7 +82,7 @@ final class FutureEventList {
    * @return {@code true} if the Future Event List is empty, otherwise {@code false}
    */
   boolean isEmpty() {
-    throw new UnsupportedOperationException("Unimplemented method 'isEmpty'");
+    return this.events.isEmpty();
   }
 
   @Override

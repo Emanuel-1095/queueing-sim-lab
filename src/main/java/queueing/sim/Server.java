@@ -28,7 +28,8 @@ final class Server implements ServerView {
    * @throws NullPointerException if {@code serviceTimeGenerator} is {@code null}
    */
   Server(int id, TimeGenerator serviceTimeGenerator) {
-    throw new UnsupportedOperationException("Unimplemented constructor 'Server'");
+    this.id = id;
+    this.serviceTimeGenerator = Objects.requireNonNull(serviceTimeGenerator);
   }
 
   /**
@@ -38,7 +39,7 @@ final class Server implements ServerView {
    */
   @Override
   public int id() {
-    throw new UnsupportedOperationException("Unimplemented method 'id'");
+    return this.id;
   }
 
   /**
@@ -58,7 +59,7 @@ final class Server implements ServerView {
    * @return the generated service duration
    */
   double serviceDuration(RandomGenerator randomGenerator) {
-    throw new UnsupportedOperationException("Unimplemented method 'serviceDuration'");
+    return this.serviceTimeGenerator.generate(randomGenerator);
   }
 
   /**
@@ -67,7 +68,7 @@ final class Server implements ServerView {
    * @return the entity being served, or {@code null} if the server is idle
    */
   Entity entity() {
-    throw new UnsupportedOperationException("Unimplemented method 'serviceDuration'");
+    return this.entity;
   }
 
   /**

@@ -1,5 +1,8 @@
 package queueing.sim.probes;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import queueing.sim.EntityView;
 
 /**
@@ -12,6 +15,8 @@ import queueing.sim.EntityView;
  */
 public final class MaxSystemTime implements Probe {
 
+  private double maxSystemTime = 0.0;
+  private final Map<EntityView, Double> arrivalTimes = new HashMap<>();
   /**
    * Records the arrival time of an entity.
    *
@@ -20,7 +25,7 @@ public final class MaxSystemTime implements Probe {
    */
   @Override
   public void entityArrived(double clock, EntityView entity) {
-    throw new UnsupportedOperationException("Unimplemented method 'entityArrived'");
+    arrivalTimes.put(entity, clock);
   }
 
   /**
@@ -34,7 +39,14 @@ public final class MaxSystemTime implements Probe {
    */
   @Override
   public void entityDeparted(double clock, EntityView entity) {
-    throw new UnsupportedOperationException("Unimplemented method 'entityDeparted'");
+    if (!arrivalTimes.containsKey(entity)) {
+      throw new IllegalStateException("Entity has not arrived: " + entity);
+    }
+    double arrivalTime = arrivalTimes.remove(entity);
+    double systemTime = clock - arrivalTime;
+    if (systemTime > maxSystemTime) {
+      maxSystemTime = systemTime;
+    }
   }
 
   /**
@@ -43,6 +55,6 @@ public final class MaxSystemTime implements Probe {
    * @return the maximum system time
    */
   public double maxSystemTime() {
-    throw new UnsupportedOperationException("Unimplemented method 'maxSystemTime'");
+    return maxSystemTime;
   }
 }

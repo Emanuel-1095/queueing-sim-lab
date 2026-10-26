@@ -1,5 +1,8 @@
 package queueing.sim.probes;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import queueing.sim.EntityView;
 import queueing.sim.QueueView;
 import queueing.sim.ServerView;
@@ -16,6 +19,11 @@ import queueing.sim.ServerView;
  */
 public final class WaitingTime implements Probe {
 
+  // Nuestro "anotador": guarda [ID de Entidad -> Tiempo en que entró a la cola]
+  private final Map<Long, Double> entryTimes = new HashMap<>();
+  // El acumulador total del tiempo que esperaron todos los clientes
+  private double totalWaitingTime = 0.0;
+
   /**
    * Records the time at which an entity enters a queue.
    *
@@ -25,7 +33,7 @@ public final class WaitingTime implements Probe {
    */
   @Override
   public void entityEnteredQueue(double clock, EntityView entity, QueueView queue) {
-    throw new UnsupportedOperationException("Unimplemented method 'entityEnteredQueue'");
+    this.entryTimes.put(entity.id(), clock);
   }
 
   /**
@@ -37,7 +45,11 @@ public final class WaitingTime implements Probe {
    */
   @Override
   public void serviceStarted(double clock, EntityView entity, ServerView server) {
-    throw new UnsupportedOperationException("Unimplemented method 'serviceStarted'");
+    Double entryTime = this.entryTimes.remove(entity.id());
+    if (entryTime != null) {
+      double waitingTime = clock - entryTime;
+      this.totalWaitingTime += waitingTime;
+    }
   }
 
   /**
@@ -46,6 +58,6 @@ public final class WaitingTime implements Probe {
    * @return the total waiting time
    */
   public double totalWaitingTime() {
-    throw new UnsupportedOperationException("Unimplemented method 'totalWaitingTime'");
+    return this.totalWaitingTime;
   }
 }
