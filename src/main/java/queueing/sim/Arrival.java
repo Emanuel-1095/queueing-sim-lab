@@ -78,6 +78,8 @@ final class Arrival implements Event {
     InternalSimulationContext internalContext = (InternalSimulationContext) context;
     List<ServerView> availableServers = internalContext.model().availableServers();
 
+    this.entity.arrivalTime(this.clock);
+
     // Colocar el Probe para calcular o obtener la cantidad de arribos
     internalContext.probes().forEach(probe -> probe.entityArrived(this.clock, this.entity));
 
@@ -107,7 +109,6 @@ final class Arrival implements Event {
       queue.add(this.entity);
 
       // Probe notifica que la entidad ha sido encolada
-      // Checkearlo
       internalContext.probes().forEach(probe -> probe.entityEnteredQueue(this.clock, this.entity, queue));
       internalContext.probes().forEach(probe -> probe.queueSizeChanged(this.clock, queue));
     }

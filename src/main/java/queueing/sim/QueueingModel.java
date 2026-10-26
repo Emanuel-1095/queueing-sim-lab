@@ -15,14 +15,6 @@ import java.util.Set;
  * <p>Queues and servers are created internally from the supplied {@link QueueConfig} objects.
  */
 
-// Analizar bien esta clase
-// El eze pregunto algo con respecto a una cola para 2 servidores
-// y una cola para 1 servidor, y que si se puede hacer eso. 
-// Lo que pasa es que podemos violar una regla, esto hace que sea menos rigido
-
-// La respuesta es que si, se puede hacer eso, porque cada cola puede tener su propia cantidad de servidores asociados. 
-// Por ejemplo, una cola puede tener 2 servidores y otra cola puede tener 1 servidor. 
-// Esto permite modelar diferentes escenarios de colas y servidores en un sistema de colas.
 public final class QueueingModel {
 
   /** The queues that compose this model. */

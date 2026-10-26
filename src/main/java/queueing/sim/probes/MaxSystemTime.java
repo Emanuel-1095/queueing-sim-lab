@@ -16,7 +16,7 @@ import queueing.sim.EntityView;
 public final class MaxSystemTime implements Probe {
 
   private double maxSystemTime = 0.0;
-  private final Map<EntityView, Double> arrivalTimes = new HashMap<>();
+  private final Map<Long, Double> arrivalTimes = new HashMap<>();
   /**
    * Records the arrival time of an entity.
    *
@@ -25,7 +25,7 @@ public final class MaxSystemTime implements Probe {
    */
   @Override
   public void entityArrived(double clock, EntityView entity) {
-    arrivalTimes.put(entity, clock);
+    arrivalTimes.put(entity.id(), clock);
   }
 
   /**
@@ -39,10 +39,10 @@ public final class MaxSystemTime implements Probe {
    */
   @Override
   public void entityDeparted(double clock, EntityView entity) {
-    if (!arrivalTimes.containsKey(entity)) {
+    if (!arrivalTimes.containsKey(entity.id())) {
       throw new IllegalStateException("Entity has not arrived: " + entity);
     }
-    double arrivalTime = arrivalTimes.remove(entity);
+    double arrivalTime = arrivalTimes.remove(entity.id());
     double systemTime = clock - arrivalTime;
     if (systemTime > maxSystemTime) {
       maxSystemTime = systemTime;

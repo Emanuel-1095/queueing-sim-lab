@@ -121,45 +121,45 @@ public final class Simulation {
 
     while (!this.futureEventList.isEmpty() && this.futureEventList.peek().clock() <= endClock) {
       
-      // if (this.stepByStep) {
-      //   System.out.println("Step-by-step mode: Press ENTER to inspect the imminent event...");
-      //   scanner.nextLine();
-      // }
+      if (this.stepByStep) {
+        System.out.println("Step-by-step mode: Press ENTER to inspect the imminent event...");
+        scanner.nextLine();
+      }
 
       Event event = this.futureEventList.peek();
 
-      // if (this.stepByStep) {
-      //   System.out.println("========================================");
-      //   System.out.println("CLOCK: " + event.clock());
-      //   System.out.println();
-      //   System.out.println("EVENT:");
-      //   System.out.println("  " + event);
-      //   System.out.println();
-      //   System.out.println("FEL:");
-      //   System.out.println("  " + this.futureEventList);
-      //   System.out.println();
-      //   System.out.println("MODEL:");
-      //   System.out.println(this.model);
-      //   System.out.println("========================================\n");
+      if (this.stepByStep) {
+        System.out.println("========================================");
+        System.out.println("CLOCK: " + event.clock());
+        System.out.println();
+        System.out.println("EVENT:");
+        System.out.println("  " + event);
+        System.out.println();
+        System.out.println("FEL:");
+        System.out.println("  " + this.futureEventList);
+        System.out.println();
+        System.out.println("MODEL:");
+        System.out.println(this.model);
+        System.out.println("========================================\n");
         
-      //   System.out.println("Press ENTER to process the imminent event...");
-      //   scanner.nextLine();
-      // }
+        System.out.println("Press ENTER to process the imminent event...");
+        scanner.nextLine();
+      }
 
       // Code here: you must advance time in the simulation.
       event = this.futureEventList.imminent();
       event.execute(context);
 
-      // if (this.stepByStep) {
-      //   System.out.println("========================================");
-      //   System.out.println();
-      //   System.out.println("FEL:");
-      //   System.out.println("  " + this.futureEventList);
-      //   System.out.println();
-      //   System.out.println("MODEL:");
-      //   System.out.println(this.model);
-      //   System.out.println("========================================\n");
-      // }
+      if (this.stepByStep) {
+        System.out.println("========================================");
+        System.out.println();
+        System.out.println("FEL:");
+        System.out.println("  " + this.futureEventList);
+        System.out.println();
+        System.out.println("MODEL:");
+        System.out.println(this.model);
+        System.out.println("========================================\n");
+      }
 
     }
 

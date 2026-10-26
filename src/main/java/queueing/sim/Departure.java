@@ -77,15 +77,15 @@ final class Departure implements Event {
           this.clock + serviceDuration, nextEntity, this.server
         )
       );
-      //checkearlo
+
       internalContext.probes().forEach(probe -> probe.queueSizeChanged(this.clock, selectedQueue));
       internalContext.probes().forEach(probe -> probe.serviceStarted(this.clock, nextEntity, this.server));
-
+    
     }
     else {
-      //checkearlo
+    
       internalContext.probes().forEach(probe -> probe.serverBecameIdle(this.clock, this.server));
-
+    
     }
   }
 

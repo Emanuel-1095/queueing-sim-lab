@@ -93,7 +93,7 @@ final class Queue implements QueueView {
    * @return an unmodifiable list of available servers
    */
   List<Server> availableServers() {
-    return this.servers.stream().filter(server -> !server.isBusy()).toList();                   // Chequear segun el test
+    return this.servers.stream().filter(server -> !server.isBusy()).toList();
   }
 
   @Override
