@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import queueing.sim.QueueView;
-import queueing.sim.ServerView;
 
 /**
  * A probe that records the maximum size reached by each queue.
