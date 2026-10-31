@@ -1,25 +1,10 @@
 package queueing.sim.orchestrator;
 
 import queueing.sim.*;
-import queueing.sim.probes.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.random.RandomGenerator;
-
-enum ProbesEnumeration{
-    ARRIBAL_COUNTER,
-    DEPARTURE_COUNTER,
-    WAITING_TIME,
-    MAX_WAITING_TIME,
-    SYSTEM_TIME,
-    MAX_SYSTEM_TIME,
-    IDLE_TIME,
-    MAX_IDLE_TIME,
-    MAX_QUEUE_SIZE
-}
 
 public class SimulationRunner {
 
@@ -47,19 +32,6 @@ public class SimulationRunner {
             }
 
             QueueingModel queueingModel = new QueueingModel(queueConfigList);
-
-            
-            // List<Probe> simulationProbes = new ArrayList<>();
-
-            // simulationProbes.add(new ArrivalCounter());
-            // simulationProbes.add(new DepartureCounter());
-            // simulationProbes.add(new WaitingTime());
-            // simulationProbes.add(new MaxWaitingTime());
-            // simulationProbes.add(new SystemTime());
-            // simulationProbes.add(new MaxSystemTime());
-            // simulationProbes.add(new IdleTime());
-            // simulationProbes.add(new MaxIdleTime());
-            // simulationProbes.add(new MaxQueueSize());
            
             RunProbes simulationProbes = new RunProbes();
 
@@ -75,63 +47,27 @@ public class SimulationRunner {
         }
 
         if(simulationConfig.replications() > 1){
-            
             showAvarageResults(allReplications, simulationConfig);
-            
-            // Calculo de los promedios de la cantidad de ejecuciones/replicaciones
-            
-            // for(List<Probe> probes : acumulationProbes){
-            //     probes.forEach(probeList -> probeList.forEach(probe -> probe.));
-            // }
-
         } else{
-
             showIndividualResult(allReplications.getFirst(), simulationConfig);
-
-            // Muestra de los resultados de una ejecución/replicación
-
-            // System.out.println("=================================================");
-            // System.out.println("               RESULTADOS OBTENIDOS              ");
-            // System.out.println("=================================================");
-            // System.out.println("Total de entidades arribadas : " + arrivalCounter.count());
-            // System.out.println("Total que iniciaron servicio : " + servedCounter.count());
-            // System.out.println("Total de entidades atendidas : " + departureCounter.count());
-            // System.out.println("-------------------------------------------------");
-            // System.out.println("Tiempo total de espera       : " + waitingTime.totalWaitingTime());
-            // System.out.println("Tiempo máximo de espera      : " + maxWaitingTime.maxWaitingTime());
-            // System.out.println("Tiempo total en el sistema   : " + systemTime.totalSystemTime());
-            // System.out.println("Tiempo máximo en el sistema  : " + maxSystemTime.maxSystemTime());
-            // System.out.println("-------------------------------------------------");
-            // for (int q = 1; q <= numQueues; q++) {
-            // try {
-            //     System.out.println("Tamaño máximo de la Cola " + q + "   : " + maxQueueSize.maxQueueSize(q));
-            // } catch (IllegalArgumentException e) {
-            //     System.out.println("Tamaño máximo de la Cola " + q + "   : 0 (no tuvo espera)");
-            // }
-            // }
-            // System.out.println("-------------------------------------------------");
-            // for (int s = 1; s < serverGlobalId; s++) {
-            // try {
-            //     System.out.println("Servidor " + s + " -> Ocio Total: " + idleTime.totalIdleTime(s) 
-            //         + " | Ocio Máx: " + maxIdleTime.maxIdleTime(s));
-            // } catch (IllegalArgumentException e) {
-            //     System.out.println("Servidor " + s + " -> Sin datos de ocio registrados.");
-            // }
-            // }
-            // System.out.println("=================================================");
-
         }
 
     }
 
     private void showIndividualResult(RunProbes p, SimulationConfig config) {
-        System.out.println("=================================================");
-        System.out.println("         RESULTADOS DE LA SIMULACION (1 corrida)");
-        System.out.println("=================================================");
+        System.out.println("==========================================================");
+        System.out.println("         RESULTADOS DE LA SIMULACIÓN (1 corrida)");
+        System.out.println("==========================================================");
+        System.out.println("Inicio de simulación : " + config.initClock());
+        System.out.println("Longitud de la simulación : " + config.simLength());
+        System.out.println("Numero de colas : " + config.numQueues());
+        System.out.println("Servidores por cola : " + config.serversPerQueue());
+        System.out.println("-------------------------------------------------");
         System.out.println("Total de entidades arribadas : " + p.arrivalCounter.count());
         System.out.println("Total que iniciaron servicio : " + p.servedCounter.count());
         System.out.println("Total de entidades atendidas : " + p.departureCounter.count());
         System.out.println("-------------------------------------------------");
+        
         System.out.println("Tiempo total de espera       : " + p.waitingTime.totalWaitingTime());
         System.out.println("Tiempo máximo de espera      : " + p.maxWaitingTime.maxWaitingTime());
         System.out.println("Tiempo total en el sistema   : " + p.systemTime.totalSystemTime());
@@ -182,6 +118,11 @@ public class SimulationRunner {
         System.out.println("=================================================");
         System.out.printf("  PROMEDIO DE RESULTADOS (%d REPLICACIONES)%n", totalRuns);
         System.out.println("=================================================");
+        System.out.println("Inicio de simulación : " + config.initClock());
+        System.out.println("Longitud de la simulación : " + config.simLength());
+        System.out.println("Numero de colas : " + config.numQueues());
+        System.out.println("Servidores por cola : " + config.serversPerQueue());
+        System.out.println("-------------------------------------------------");
         System.out.printf("Promedio de entidades arribadas : %.2f%n", avgArrivals);
         System.out.printf("Promedio que iniciaron servicio : %.2f%n", avgServed);
         System.out.printf("Promedio de entidades atendidas : %.2f%n", avgDepartures);

@@ -140,7 +140,7 @@ public class ConsolesMenu {
 
                 case 4:
                     System.out.println("Discrete distribution");
-                    System.out.println("Ingrese la cantidad de valores: ");
+                    System.out.println("Ingrese la cantidad de valores (filas de la tabla): ");
                     int n = scanner.nextInt();
 
                     double values = 0.0;
