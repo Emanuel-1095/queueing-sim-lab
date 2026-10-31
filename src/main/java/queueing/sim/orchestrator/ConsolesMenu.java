@@ -75,9 +75,9 @@ public class ConsolesMenu {
         System.out.print("Ingrese la cantidad de servidores por pista: ");
         int serversPerQueue = scanner.nextInt();
 
-        TimeGenerator interArrivalGenerator = elegirDistribucion("arribos");
+        TimeGenerator interArrivalGenerator = elegirDistribucion("arribos", simLength);
 
-        TimeGenerator servicGenerator = elegirDistribucion("servicio");
+        TimeGenerator servicGenerator = elegirDistribucion("servicio", simLength);
 
         StrategyBag strategyBag = new StrategyBag(  
                                                 new FirstAvailable(), 
@@ -106,18 +106,19 @@ public class ConsolesMenu {
         return config;
     }
     
-    private TimeGenerator elegirDistribucion(String nombre){
+    private TimeGenerator elegirDistribucion(String nombre, double simLength){
         while (true){
             System.out.println("--- Elija la distribucion para " + nombre + " ---");
             System.out.println("1. Uniforme");
             System.out.println("2. Exponencial");
-            System.out.println("3. Normal");
-            System.out.println("4. Discreta");
+            System.out.println("3. Exponencial con Hora Pico");
+            System.out.println("4. Normal");
+            System.out.println("5. Discreta");
             int option = scanner.nextInt();
 
             switch (option) {
                 case 1:
-                    System.out.println("Uniform distribution");
+                    System.out.println("Distribucion Uniforme");
                     System.out.print("Ingrese el limite inferior (a): ");
                     double a = scanner.nextDouble();
                     System.out.print("Ingrese el limite superior (b): ");
@@ -125,21 +126,29 @@ public class ConsolesMenu {
                     return adapter.genUniform(a,b);
 
                 case 2:
-                    System.out.println("Exponential distribution");
+                    System.out.println("Distribucion Exponencial");
                     System.out.println("Ingrese la media (mu): ");
                     double mu_E = scanner.nextDouble();
                     return adapter.genExponential(mu_E);
 
                 case 3:
-                    System.out.println("Normal distribution");
+                    System.out.println("Distribucion Exponencial con Hora Pico");
+                    System.out.println("Ingrese la media normal (mu): ");
+                    double mu_E_Norm = scanner.nextDouble();
+                    System.out.println("Ingrese la media en hora pico: ");
+                    double mu_E_HP = scanner.nextDouble();
+                    return adapter.genExponentialHoraPico(mu_E_Norm, mu_E_HP, simLength);
+
+                case 4:
+                    System.out.println("Distribucion Normal");
                     System.out.println("Ingrese la media (mu): ");
                     double mu_N = scanner.nextDouble();
                     System.out.println("Ingrese la desviacion estandar (sigma): ");
                     double sigma = scanner.nextDouble();
                     return adapter.genNormal(mu_N, sigma);
 
-                case 4:
-                    System.out.println("Discrete distribution");
+                case 5:
+                    System.out.println("Distribucion Discrete");
                     System.out.println("Ingrese la cantidad de valores (filas de la tabla): ");
                     int n = scanner.nextInt();
 
@@ -164,51 +173,51 @@ public class ConsolesMenu {
     }
 
     private SimulationConfig configDefault() {
-        // initClock -> Entrega 1: 0.0 | Entrega 2: 0.0
+        // Entrega 1 y 2: 0.0
         double initClock = 0.0;
 
-        // simLength -> Entrega 1: 40320.0 (4 semanas) | Entrega 2: 40320.0 (4 semanas)
+        // Entrega 1 y 2: 40320.0 (4 semanas)
         double simLength = 40320.0;
 
-        // numQueues -> Entrega 1: 1 (única pista/cola) | Entrega 2: 5 (5 pistas con 1 cola c/u)
+        // Entrega 1: 1 | Entrega 2: 5 (5 pistas con 1 cola c/u)
         int numQueues = 5;
 
-        // serversPerQueue -> Entrega 1: 1 | Entrega 2: 1
+        // Entrega 1: 1 | Entrega 2: 1
         int serversPerQueue = 1;
 
         /*
-         * interArrivalGenerator (Tiempos entre arribos):
          * - Entrega 1 (Tabla 1 - Empírica Discreta):
          *     Map.of(10.0, 0.35, 15.0, 0.45, 17.0, 0.20)
          *     -> adapter.getDiscret(Map.of(10.0, 0.35, 15.0, 0.45, 17.0, 0.20))
+         * 
          * - Entrega 2 (Exponencial):
          *     mu = 15.0 min (fuera de hora pico) / mu = 9.0 min (hora pico 9-13hs y 20-23hs)
-         *     -> adapter.genExponential(15.0)
+         *     -> adapter.genExponentialHoraPico(15.0, 9.0, simLength)
          */
-        TimeGenerator interArrivalGenerator = adapter.genExponential(15.0);
+        TimeGenerator interArrivalGenerator = adapter.genExponentialHoraPico(15.0, 9.0, simLength);
 
         /*
-         * servicGenerator (Tiempos de aterrizaje / servicio):
          * - Entrega 1 (Tabla 2 - Empírica Discreta):
          *     Map.of(8.0, 0.38, 10.0, 0.32, 13.0, 0.10, 15.0, 0.20)
          *     -> adapter.getDiscret(Map.of(8.0, 0.38, 10.0, 0.32, 13.0, 0.10, 15.0, 0.20))
+         * 
          * - Entrega 2 (Uniforme):
          *     a = 10.0 min, b = 25.0 min
          *     -> adapter.genUniform(10.0, 25.0)
          */
         TimeGenerator servicGenerator = adapter.genUniform(10.0, 25.0);
 
-        // strategyBag -> Entrega 1: 1er servidor libre y única cola | Entrega 2: 1er servidor libre y cola más corta
+        // Entrega 1: 1er servidor libre y única cola | Entrega 2: 1er servidor libre y cola más corta
         StrategyBag strategyBag = new StrategyBag(
             new FirstAvailable(),
             queues -> queues.stream().min(Comparator.comparingInt(QueueView::size)).orElseThrow().id(),
             queues -> queues.getFirst().id()
         );
 
-        // replications -> Entrega 1: 1 | Entrega 2: 1 (En Entrega 3 son 50)
+        // Entrega 1 y 2: 1
         int replications = 1;
 
-        // stepByStep -> Entrega 1: false | Entrega 2: false
+        // Entrega 1 y 2: false
         boolean stepByStep = false;
 
         return new SimulationConfig(
