@@ -148,13 +148,13 @@ public class ConsolesMenu {
                     return adapter.genNormal(mu_N, sigma);
 
                 case 5:
-                    System.out.println("Distribucion Discrete");
+                    System.out.println("Distribución Discreta");
                     System.out.println("Ingrese la cantidad de valores (filas de la tabla): ");
                     int n = scanner.nextInt();
 
                     double values = 0.0;
                     double probabilities = 0.0;
-                    Map<Double,Double> table = new java.util.HashMap<>();
+                    Map<Double,Double> table = new HashMap<>();
 
                     for(int i=0; i<n; i++){
                         System.out.println("Ingrese el valor " + (i+1) + ": ");
