@@ -24,7 +24,7 @@ public class ConsolesMenu {
             System.out.println("2. Ejecutar Simulacion de la Entrega 2");
             System.out.println("3. Ejecutar Simulacion Custom");
             System.out.println("0. Salir\n");
-            System.out.println("Elija una opcion: ");
+            System.out.print("Elija una opcion: ");
             int option = scanner.nextInt();
 
             switch (option) {
