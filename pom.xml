@@ -13,7 +13,7 @@
   <url>https://github.com/dglabella/queueing-sim-lab.git</url>
 
   <properties>
-    <maven.compiler.release>21</maven.compiler.release>
+    <maven.compiler.release>25</maven.compiler.release>
     <junit.version>5.10.2</junit.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
