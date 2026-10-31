@@ -16,6 +16,11 @@ public class RunProbes {
     public final IdleTime idleTime = new IdleTime();
     public final MaxIdleTime maxIdleTime = new MaxIdleTime();
     public final MaxQueueSize maxQueueSize = new MaxQueueSize();
+    public final MinWaitingTime minWaitingTime = new MinWaitingTime();
+    public final MinSystemTime minSystemTime = new MinSystemTime();
+    public final MinIdleTime minIdleTime = new MinIdleTime();
+    public final MinQueueSize minQueueSize = new MinQueueSize();
+    public final RunwayDurability runwayDurability = new RunwayDurability();
     /**
      * Retorna todas las sondas como una lista para pasar al constructor de Simulation.
      */
@@ -30,7 +35,12 @@ public class RunProbes {
             maxSystemTime,
             idleTime,
             maxIdleTime,
-            maxQueueSize
+            maxQueueSize,
+            minWaitingTime,
+            minSystemTime,
+            minIdleTime,
+            minQueueSize,
+            runwayDurability
         );
     }
 }

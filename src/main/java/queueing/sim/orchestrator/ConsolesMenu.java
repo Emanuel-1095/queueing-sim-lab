@@ -19,36 +19,28 @@ public class ConsolesMenu {
 
     public void start(){
         while (true){
-            System.out.println("------- MENU --------");
-            System.out.println("1. Configurar Simulacion");
-            System.out.println("2. Ejecutar Simulacion");
+            System.out.println("\n---------------- MENU ----------------");
+            System.out.println("1. Ejecutar Simulacion de la Entrega 1");
+            System.out.println("2. Ejecutar Simulacion de la Entrega 2");
+            System.out.println("3. Ejecutar Simulacion Custom");
             System.out.println("0. Salir\n");
             System.out.println("Elija una opcion: ");
             int option = scanner.nextInt();
 
             switch (option) {
                 case 1:
-                    this.config = crearConfig();
+                    this.config = configEntrega1();
+                    runner.run(this.config);
                     break;
 
                 case 2:
-                    if (config != null){
-                        runner.run(this.config);
-                    }else{
-                        int continuar = 0;
-                        System.out.println("CONFIGURACION NO DETECTADA");
-                        System.out.println("Continuar con la configuracion defaul? ");
-                        System.out.println("1. SI");
-                        System.out.println("0. NO");
-                        continuar = scanner.nextInt();
+                    this.config = configEntrega2();
+                    runner.run(this.config);
+                    break;
 
-                        if (continuar == 1){
-                            this.config = configDefault();
-                            runner.run(this.config);
-                        }else{
-                            break;
-                        }
-                    }
+                case 3:
+                    this.config = crearConfig();
+                    runner.run(this.config);
                     break;
 
                 case 0:
@@ -148,7 +140,7 @@ public class ConsolesMenu {
                     return adapter.genNormal(mu_N, sigma);
 
                 case 5:
-                    System.out.println("Distribución Discreta");
+                    System.out.println("Distribucion Discreta");
                     System.out.println("Ingrese la cantidad de valores (filas de la tabla): ");
                     int n = scanner.nextInt();
 
@@ -172,52 +164,47 @@ public class ConsolesMenu {
         }
     }
 
-    private SimulationConfig configDefault() {
-        // Entrega 1 y 2: 0.0
+    private SimulationConfig configEntrega1() {
         double initClock = 0.0;
-
-        // Entrega 1 y 2: 40320.0 (4 semanas)
         double simLength = 40320.0;
-
-        // Entrega 1: 1 | Entrega 2: 5 (5 pistas con 1 cola c/u)
-        int numQueues = 5;
-
-        // Entrega 1: 1 | Entrega 2: 1
+        int numQueues = 1;
         int serversPerQueue = 1;
+        TimeGenerator interArrivalGenerator = adapter.getDiscret(Map.of(10.0, 0.35, 15.0, 0.45, 17.0, 0.20));
+        TimeGenerator servicGenerator = adapter.getDiscret(Map.of(8.0, 0.38, 10.0, 0.32, 13.0, 0.10, 15.0, 0.20));
+        StrategyBag strategyBag = new StrategyBag(
+            new FirstAvailable(),
+            queues -> queues.getFirst().id(),
+            queues -> queues.getFirst().id()
+        );
+        int replications = 1;
+        boolean stepByStep = false;
 
-        /*
-         * - Entrega 1 (Tabla 1 - Empírica Discreta):
-         *     Map.of(10.0, 0.35, 15.0, 0.45, 17.0, 0.20)
-         *     -> adapter.getDiscret(Map.of(10.0, 0.35, 15.0, 0.45, 17.0, 0.20))
-         * 
-         * - Entrega 2 (Exponencial):
-         *     mu = 15.0 min (fuera de hora pico) / mu = 9.0 min (hora pico 9-13hs y 20-23hs)
-         *     -> adapter.genExponentialHoraPico(15.0, 9.0, simLength)
-         */
+        return new SimulationConfig(
+            initClock,
+            simLength,
+            numQueues,
+            serversPerQueue,
+            interArrivalGenerator,
+            servicGenerator,
+            strategyBag,
+            replications,
+            stepByStep
+        );
+    }
+
+    private SimulationConfig configEntrega2() {
+        double initClock = 0.0;
+        double simLength = 40320.0;
+        int numQueues = 5;
+        int serversPerQueue = 1;
         TimeGenerator interArrivalGenerator = adapter.genExponentialHoraPico(15.0, 9.0, simLength);
-
-        /*
-         * - Entrega 1 (Tabla 2 - Empírica Discreta):
-         *     Map.of(8.0, 0.38, 10.0, 0.32, 13.0, 0.10, 15.0, 0.20)
-         *     -> adapter.getDiscret(Map.of(8.0, 0.38, 10.0, 0.32, 13.0, 0.10, 15.0, 0.20))
-         * 
-         * - Entrega 2 (Uniforme):
-         *     a = 10.0 min, b = 25.0 min
-         *     -> adapter.genUniform(10.0, 25.0)
-         */
         TimeGenerator servicGenerator = adapter.genUniform(10.0, 25.0);
-
-        // Entrega 1: 1er servidor libre y única cola | Entrega 2: 1er servidor libre y cola más corta
         StrategyBag strategyBag = new StrategyBag(
             new FirstAvailable(),
             queues -> queues.stream().min(Comparator.comparingInt(QueueView::size)).orElseThrow().id(),
             queues -> queues.getFirst().id()
         );
-
-        // Entrega 1 y 2: 1
         int replications = 1;
-
-        // Entrega 1 y 2: false
         boolean stepByStep = false;
 
         return new SimulationConfig(

@@ -69,15 +69,21 @@ public class SimulationRunner {
         System.out.println("-------------------------------------------------");
         
         System.out.println("Tiempo total de espera       : " + p.waitingTime.totalWaitingTime());
+        System.out.println("Tiempo mínimo de espera      : " + p.minWaitingTime.minWaitingTime());
         System.out.println("Tiempo máximo de espera      : " + p.maxWaitingTime.maxWaitingTime());
-        System.out.println("Tiempo total en el sistema   : " + p.systemTime.totalSystemTime());
-        System.out.println("Tiempo máximo en el sistema  : " + p.maxSystemTime.maxSystemTime());
+        System.out.println("Tiempo medio de espera       : " + p.waitingTime.totalWaitingTime()/p.servedCounter.count());
+        System.out.println("Tiempo total de transito (en el sistema)   : " + p.systemTime.totalSystemTime());
+        System.out.println("Tiempo mínimo de transito (en el sistema)  : " + p.minSystemTime.minSystemTime());
+        System.out.println("Tiempo máximo de transito (en el sistema)  : " + p.maxSystemTime.maxSystemTime());
+        System.out.println("Tiempo medio de transito (en el sistema)   : " + p.systemTime.totalSystemTime()/p.departureCounter.count());
         System.out.println("-------------------------------------------------");
         for (int q = 0; q < config.numQueues(); q++) {
             try {
-                System.out.println("Tamaño máximo de la Cola " + q + "   : " + p.maxQueueSize.maxQueueSize(q));
+                System.out.println("Cola " + q + " -> Máx: " + p.maxQueueSize.maxQueueSize(q)
+                    + " | Mín: " + p.minQueueSize.minQueueSize(q));
+
             } catch (IllegalArgumentException e) {
-                System.out.println("Tamaño máximo de la Cola " + q + "   : 0 (sin espera)");
+                System.out.println("Cola " + q + " -> Máx: 0 | Mín: 0 (sin espera)");
             }
         }
         System.out.println("-------------------------------------------------");
@@ -85,7 +91,10 @@ public class SimulationRunner {
         for (int s = 0; s < totalServers; s++) {
             try {
                 System.out.println("Servidor " + s + " -> Ocio Total: " + p.idleTime.totalIdleTime(s)
-                    + " | Ocio Máx: " + p.maxIdleTime.maxIdleTime(s));
+                    + " | Proporcion: " + (p.idleTime.totalIdleTime(s) / config.simLength()) * 100.0 + "%"
+                    + " | Ocio Mín: " + p.minIdleTime.minIdleTime(s)
+                    + " | Ocio Máx: " + p.maxIdleTime.maxIdleTime(s)
+                    + " | Durabilidad final: " + p.runwayDurability.durability(s));
             } catch (IllegalArgumentException e) {
                 System.out.println("Servidor " + s + " -> Sin tiempo ocioso registrado.");
             }
@@ -94,27 +103,25 @@ public class SimulationRunner {
     }
 
     private void showAvarageResults(List<RunProbes> runs, SimulationConfig config) {
-        
-        // int sumaArribos = 0;
-        // for (RunProbes r : runs) {
-        //     sumaArribos += r.arrivalCounter.count();
-        // }
-        // double avgArrivals;
-        // if (!runs.isEmpty()) {
-        //     avgArrivals = (double) sumaArribos / runs.size();
-        // } else {
-        //     avgArrivals = 0.0;
-        // }
-        
         int totalRuns = runs.size();
         double avgArrivals = runs.stream().mapToInt(r -> r.arrivalCounter.count()).average().orElse(0.0);
         double avgServed = runs.stream().mapToInt(r -> r.servedCounter.count()).average().orElse(0.0);
         double avgDepartures = runs.stream().mapToInt(r -> r.departureCounter.count()).average().orElse(0.0);
         
         double avgWaitingTime = runs.stream().mapToDouble(r -> r.waitingTime.totalWaitingTime()).average().orElse(0.0);
+        double avgMeanWaitingTime = runs.stream()
+            .mapToDouble(r -> r.servedCounter.count() > 0 ? r.waitingTime.totalWaitingTime() / r.servedCounter.count() : 0.0)
+            .average().orElse(0.0);
         double avgMaxWaitingTime = runs.stream().mapToDouble(r -> r.maxWaitingTime.maxWaitingTime()).average().orElse(0.0);
+        double avgMinWaitingTime = runs.stream().mapToDouble(r -> r.minWaitingTime.minWaitingTime()).average().orElse(0.0);
+
         double avgSystemTime = runs.stream().mapToDouble(r -> r.systemTime.totalSystemTime()).average().orElse(0.0);
+        double avgMeanSystemTime = runs.stream()
+            .mapToDouble(r -> r.departureCounter.count() > 0 ? r.systemTime.totalSystemTime() / r.departureCounter.count() : 0.0)
+            .average().orElse(0.0);
         double avgMaxSystemTime = runs.stream().mapToDouble(r -> r.maxSystemTime.maxSystemTime()).average().orElse(0.0);
+        double avgMinSystemTime = runs.stream().mapToDouble(r -> r.minSystemTime.minSystemTime()).average().orElse(0.0);   
+
         System.out.println("=================================================");
         System.out.printf("  PROMEDIO DE RESULTADOS (%d REPLICACIONES)%n", totalRuns);
         System.out.println("=================================================");
@@ -128,9 +135,13 @@ public class SimulationRunner {
         System.out.printf("Promedio de entidades atendidas : %.2f%n", avgDepartures);
         System.out.println("-------------------------------------------------");
         System.out.printf("Promedio tiempo total de espera : %.2f%n", avgWaitingTime);
+        System.out.printf("Promedio tiempo medio de espera : %.2f%n", avgMeanWaitingTime);
+        System.out.printf("Promedio tiempo mín. de espera  : %.2f%n", avgMinWaitingTime);
         System.out.printf("Promedio tiempo máximo de espera: %.2f%n", avgMaxWaitingTime);
         System.out.printf("Promedio tiempo total en sistema: %.2f%n", avgSystemTime);
+        System.out.printf("Promedio tiempo medio en sistema: %.2f%n", avgMeanSystemTime);
         System.out.printf("Promedio tiempo máx. en sistema : %.2f%n", avgMaxSystemTime);
+        System.out.printf("Promedio tiempo mín. en sistema : %.2f%n", avgMinSystemTime);
         System.out.println("-------------------------------------------------");
         // Métricas promedio por cola
         for (int q = 0; q < config.numQueues(); q++) {
@@ -144,7 +155,18 @@ public class SimulationRunner {
                     }
                 })
                 .average().orElse(0.0);
-            System.out.printf("Cola %d -> Tamaño máximo promedio    : %.2f%n", queueId, avgMaxQueue);
+            
+            double avgMinQueue = runs.stream()
+                .mapToInt(r -> {
+                    try {
+                        return r.minQueueSize.minQueueSize(queueId);
+                    } catch (IllegalArgumentException e) {
+                        return 0;
+                    }
+                })
+                .average().orElse(0.0);
+
+            System.out.printf("Cola %d -> Tamaño máx promedio: %.2f | Tamaño mín promedio: %.2f%n", queueId, avgMaxQueue, avgMinQueue);
         }
         System.out.println("-------------------------------------------------");
         // Métricas promedio por servidor
@@ -160,6 +182,7 @@ public class SimulationRunner {
                     }
                 })
                 .average().orElse(0.0);
+            double avgIdleProportion = (avgIdle / config.simLength()) * 100.0;
             double avgMaxIdle = runs.stream()
                 .mapToDouble(r -> {
                     try {
@@ -169,8 +192,29 @@ public class SimulationRunner {
                     }
                 })
                 .average().orElse(0.0);
-            System.out.printf("Servidor %d -> Ocio Total Promedio: %.2f | Ocio Máx Promedio: %.2f%n",
-                serverId, avgIdle, avgMaxIdle);
+
+            double avgMinIdle = runs.stream()
+                .mapToDouble(r -> {
+                    try {
+                        return r.minIdleTime.minIdleTime(serverId);
+                    } catch (IllegalArgumentException e) {
+                        return 0.0;
+                    }
+                })
+                .average().orElse(0.0);
+
+            double avgDurability = runs.stream()
+                .mapToDouble(r -> {
+                    try {
+                        return r.runwayDurability.durability(serverId);
+                    } catch (IllegalArgumentException e) {
+                        return 3000.0;
+                    }
+                })
+                .average().orElse(3000.0);
+                
+            System.out.printf("Servidor %d -> Ocio Total Promedio: %.2f (%.2f%%) | Ocio Máx Promedio: %.2f | Ocio Mín Promedio: %.2f | Durabilidad Final Promedio: %.2f%n",
+                serverId, avgIdle, avgIdleProportion, avgMaxIdle, avgMinIdle, avgDurability);
         }
         System.out.println("=================================================\n");
     }
